@@ -128,6 +128,53 @@ if uploaded_file:
         # Reattach non-imputed columns to the imputed dataset
         df_final = pd.concat([df[non_predictive_columns].reset_index(drop=True), df_imputed], axis=1)
         st.write("Step 7: Missing values imputed using Iterative Imputer.")
+        st.write("### Dataset After Imputation")
+        st.dataframe(df_final.head())
+
+        # Visualize before and after imputation
+        st.header("Column Distribution Before and After Imputation")
+        columns_imputed = [col for col in numerical_columns if col in df.columns and col in df_final.columns]
+        for column in columns_imputed:
+            fig, ax = plt.subplots(figsize=(10, 6))
+            sns.histplot(df[column], color='red', label='Before Imputation', kde=True, bins=30, alpha=0.6, ax=ax)
+            sns.histplot(df_final[column], color='green', label='After Imputation', kde=True, bins=30, alpha=0.6, ax=ax)
+            plt.title(f"Distribution Comparison: {column}")
+            plt.legend()
+            st.pyplot(fig)
+
+        # Kolmogorov-Smirnov Test
+        st.header("Kolmogorov-Smirnov Test Results")
+        ks_results = {}
+        for column in columns_imputed:
+            before = df[column].dropna()
+            after = df_final[column].dropna()
+            ks_stat, p_value = ks_2samp(before, after)
+            ks_results[column] = {'KS Statistic': ks_stat, 'p-value': p_value}
+        ks_results_df = pd.DataFrame(ks_results).T
+        st.write(ks_results_df)
+
+        # Contamination Index
+        native_means = {
+            "As": 6.2, "Cd": 0.375, "Cr": 28.5, "Cu": 23.0, "Ni": 17.95, "Pb": 33.0, "Zn": 94.5
+        }
+
+        for element, mean_value in native_means.items():
+            df_final[f"CI_{element}"] = (df_final[element] / mean_value).round(2)
+
+        ci_columns = [f"CI_{element}" for element in native_means.keys()]
+        df_final["ICI"] = df_final[ci_columns].mean(axis=1).round(2)
+
+        def classify_ici(ici):
+            if ici <= 1:
+                return "Low Contamination"
+            elif 1 < ici <= 3:
+                return "Moderate Contamination"
+            else:
+                return "High Contamination"
+
+        df_final["ICI_Class"] = df_final["ICI"].apply(classify_ici)
+        st.write("### Final Dataset with Contamination Index")
+        st.dataframe(df_final)
 
         # Final validation
         final_missing = df_final.isnull().sum().sum()
@@ -157,4 +204,3 @@ if uploaded_file:
         st.error(f"An error occurred: {e}")
 else:
     st.write("Please upload a dataset to start the cleaning process.")
-
