@@ -171,4 +171,41 @@ if uploaded_file:
 
         def classify_ici(ici):
             if ici <= 1:
-                return
+                return "Low Contamination"
+            elif 1 < ici <= 3:
+                return "Moderate Contamination"
+            else:
+                return "High Contamination"
+
+        df_final["ICI_Class"] = df_final["ICI"].apply(classify_ici)
+
+        st.write("### Final Dataset with Contamination Index")
+        st.dataframe(df_final)
+
+        # Final validation
+        final_missing = df_final.isnull().sum().sum()
+        final_duplicates = df_final.duplicated().sum()
+        st.write("### Final Dataset Validation")
+        st.write(f"No. of missing values: {final_missing}")
+        st.write(f"No. of duplicate rows: {final_duplicates}")
+
+        if final_missing == 0 and final_duplicates == 0:
+            st.success("Cleaned dataset is ready! No missing values or duplicates remain.")
+
+        # File Download
+        st.header("Download Cleaned Dataset")
+        st.write("Your data is now cleaned and ready for analysis. Click the button below to download the cleaned dataset.")
+        from io import BytesIO
+        buffer = BytesIO()
+        df_final.to_excel(buffer, index=False, engine='openpyxl')
+        buffer.seek(0)
+
+        st.download_button(
+            label="Download as Excel",
+            data=buffer,
+            file_name="cleaned_dataset.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        except Exception as e:
+            st.error(f"An error occurred during the data cleaning process: {e}")
+            st.write("Please check your dataset for inconsistencies or missing required columns and try again.")
