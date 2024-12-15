@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -39,20 +38,21 @@ if uploaded_file:
         rows_before = len(df)
         df = df.dropna(subset=critical_columns, how='any')
         rows_after = len(df)
-        st.write(f"Rows removed due to missing critical values: {rows_before - rows_after}")
+        st.write(f"Step 1: Rows removed due to missing critical values: {rows_before - rows_after}")
 
         # Check for duplicates
         duplicates = df.duplicated().sum()
-        st.write(f"**Number of duplicate rows:** {duplicates}")
+        st.write(f"Step 2: Number of duplicate rows identified: {duplicates}")
         if duplicates > 0:
-            st.write(f"**Percentage of duplicate rows:** {duplicates / len(df) * 100:.2f}%")
-        if st.button("Remove Duplicates"):
-            df = df.drop_duplicates()
-            st.write("Duplicates removed!")
+            st.write(f"Percentage of duplicate rows: {duplicates / len(df) * 100:.2f}%")
+            if st.button("Remove Duplicates"):
+                df = df.drop_duplicates()
+                st.write("All duplicate rows have been removed!")
 
         # Extract sample count from 'Site No.1'
         if 'Site No.1' in df.columns:
             df['Sample Count'] = df['Site No.1'].str.extract(r'-(\d{2})$').astype(int)
+            st.write("Step 3: Sample count extracted from 'Site No.1'.")
         else:
             st.warning("Column 'Site No.1' is missing. Sample count extraction skipped.")
 
@@ -66,12 +66,14 @@ if uploaded_file:
             ]
             period_labels = ['1995-2000', '2008-2012', '2013-2017', '2018-2023']
             df['Period'] = np.select(conditions, period_labels, default='Unknown')
+            st.write("Step 4: Period labels assigned based on 'Year'.")
         else:
             st.warning("Column 'Year' is missing. Period assignment skipped.")
 
         # Keep latest sample count for each site-period
         if 'Site Num' in df.columns and 'Period' in df.columns:
             df = df.loc[df.groupby(['Site Num', 'Period'])['Sample Count'].idxmax()].reset_index(drop=True)
+            st.write("Step 5: Retained latest sample count for each site-period.")
         else:
             st.warning("Columns 'Site Num' or 'Period' are missing. Filtering latest samples skipped.")
 
@@ -79,6 +81,7 @@ if uploaded_file:
         columns_with_less_than = [col for col in df.columns if df[col].astype(str).str.contains('<').any()]
         for column in columns_with_less_than:
             df[column] = df[column].apply(lambda x: float(x[1:]) / 2 if isinstance(x, str) and x.startswith('<') else x)
+        st.write(f"Step 6: Replaced '<' values in columns: {columns_with_less_than}")
 
         # Imputation using IterativeImputer (only for numerical columns)
         non_predictive_columns = ['Site No.1', 'Site Num', 'Year', 'Sample Count', 'Period']
@@ -91,6 +94,17 @@ if uploaded_file:
 
         # Reattach non-imputed columns to the imputed dataset
         df_final = pd.concat([df[non_predictive_columns].reset_index(drop=True), df_imputed], axis=1)
+        st.write("Step 7: Missing values imputed using Iterative Imputer.")
+
+        # Final validation
+        final_missing = df_final.isnull().sum().sum()
+        final_duplicates = df_final.duplicated().sum()
+        st.write("### Final Dataset Validation")
+        st.write(f"No. of missing values: {final_missing}")
+        st.write(f"No. of duplicate rows: {final_duplicates}")
+
+        if final_missing == 0 and final_duplicates == 0:
+            st.success("Cleaned dataset is ready! No missing values or duplicates remain.")
 
         # Visualize before and after imputation
         columns_imputed = ['MP-10', 'As', 'Cd', 'Cr', 'Cu', 'Ni', 'Pb', 'Zn']
@@ -156,4 +170,3 @@ if uploaded_file:
         st.error(f"An error occurred: {e}")
 else:
     st.write("Please upload a dataset to start the cleaning process.")
-
