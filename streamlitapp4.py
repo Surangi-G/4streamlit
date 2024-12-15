@@ -12,11 +12,13 @@ st.title("Ecosoil Insight AKL: Data Cleaning App")
 
 # Introduction Section
 st.write("""
-Welcome to the Ecosoil Insight AKL Data Cleaning App. 
+Welcome to the Ecosoil Insight AKL Data Cleaning App! 
 
-This app is designed to clean raw soil data collected from physical samples in Auckland. Follow the step-by-step process to validate, clean, and prepare your dataset for further analysis. 
+This app is designed to clean and prepare soil data, including site metadata, soil quality metrics, and contamination levels. It addresses common issues like missing values, duplicates, and irregularities, ensuring the dataset is accurate and ready for advanced analysis. 
 
-To get started, upload your raw dataset below.
+The app uses the Iterative Imputer method, a machine learning technique that predicts and fills missing values by modeling each column as a function of the others, ensuring consistency and reliability in the cleaned data. 
+
+To get started, upload your raw dataset below and follow the guided steps.
 """)
 
 # File Upload Section
@@ -209,3 +211,4 @@ if uploaded_file:
     except Exception as e:
         st.error(f"An error occurred during the data cleaning process: {e}")
         st.write("Please check your dataset for inconsistencies or missing required columns and try again.")
+
