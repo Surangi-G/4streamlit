@@ -206,6 +206,6 @@ if uploaded_file:
             file_name="cleaned_dataset.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
-        except Exception as e:
-            st.error(f"An error occurred during the data cleaning process: {e}")
-            st.write("Please check your dataset for inconsistencies or missing required columns and try again.")
+    except Exception as e:
+        st.error(f"An error occurred during the data cleaning process: {e}")
+        st.write("Please check your dataset for inconsistencies or missing required columns and try again.")
