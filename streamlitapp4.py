@@ -16,7 +16,7 @@ Welcome to the Ecosoil Insight AKL Data Cleaning App!
 
 This app is designed to clean and prepare soil data, including site metadata, soil quality metrics, and contamination levels. It addresses common issues like missing values, duplicates, and irregularities, ensuring the dataset is accurate and ready for advanced analysis. 
 
-The app uses the Iterative Imputer method, a machine learning technique that predicts and fills missing values by modeling each column as a function of the others, ensuring consistency and reliability in the cleaned data. 
+The app uses the Iterative Imputer method, a machine learning technique that predicts and fills missing values by modeling each numerical column as a function of others. **Note:** Currently, this app supports imputation only for numerical columns. Categorical data imputation is not yet supported and must be handled externally. 
 
 To get started, upload your raw dataset below and follow the guided steps.
 """)
@@ -211,4 +211,3 @@ if uploaded_file:
     except Exception as e:
         st.error(f"An error occurred during the data cleaning process: {e}")
         st.write("Please check your dataset for inconsistencies or missing required columns and try again.")
-
