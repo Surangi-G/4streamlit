@@ -10,6 +10,15 @@ from sklearn.impute import IterativeImputer
 # Streamlit App Title
 st.title("Ecosoil Insight AKL: Data Cleaning App")
 
+# Introduction Section
+st.write("""
+Welcome to the Ecosoil Insight AKL Data Cleaning App. 
+
+This app is designed to clean raw soil data collected from physical samples in Auckland. Follow the step-by-step process to validate, clean, and prepare your dataset for further analysis. 
+
+To get started, upload your raw dataset below.
+""")
+
 # File Upload Section
 st.header("Upload Dataset")
 uploaded_file = st.file_uploader("Upload your Excel file", type=["xlsx"])
@@ -155,6 +164,7 @@ if uploaded_file:
 
         # File Download
         st.header("Download Cleaned Dataset")
+        st.write("Your data is now cleaned and ready for analysis. Click the button below to download the cleaned dataset.")
         from io import BytesIO
         buffer = BytesIO()
         df_final.to_excel(buffer, index=False, engine='openpyxl')
@@ -170,3 +180,4 @@ if uploaded_file:
         st.error(f"An error occurred: {e}")
 else:
     st.write("Please upload a dataset to start the cleaning process.")
+
